@@ -32,14 +32,15 @@ func (b *Buffer) WriteHeader(resp int) {
 //output the buffered headers, response code, and data. It returns the number
 //of bytes written and any errors flushing.
 func (b *Buffer) Apply(w http.ResponseWriter) (n int, err error) {
-	h := w.Header()
-	for key, val := range b.headers {
-		h[key] = val
+	if len(b.headers) > 0 {
+		h := w.Header()
+		for key, val := range b.headers {
+			h[key] = val
+		}
 	}
 	if b.resp > 0 {
 		w.WriteHeader(b.resp)
 	}
-	n64, err := b.WriteTo(w)
-	n = int(n64) //no loss due to docs on bytes.Buffer.WriteTo
+	n, err = w.Write(b.Bytes())
 	return
 }
